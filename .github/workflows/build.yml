@@ -32,14 +32,22 @@ jobs:
           pip install --upgrade https://github.com/kivy/buildozer/archive/master.zip
           pip install "cython<3.0"
 
-      - name: Accept All Android Licenses
+      - name: Link SDK and Pre-install Build Tools
         run: |
+          # قبول التراخيص في أدوات السيرفر
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+          # تثبيت build-tools المستقرة مسبقاً
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-33" "platform-tools"
+
+          # نسخ مجلد التراخيص إلى مسار buildozer لتفادي سؤال الترخيص نهائياً
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          cp -r $ANDROID_HOME/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
 
       - name: Build APK with Buildozer
         env:
-          ANDROIDSDK: /usr/local/lib/android/sdk
-          ANDROIDNDK: /usr/local/lib/android/sdk/ndk/25.2.9519653
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
         run: |
           buildozer -v android debug
