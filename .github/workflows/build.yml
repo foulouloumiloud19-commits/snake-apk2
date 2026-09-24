@@ -27,23 +27,23 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld wget
           pip install --upgrade pip
           pip install "buildozer>=1.5.0" "cython<3.0"
 
-      - name: Configure Android SDK & Accept Licenses
+      - name: Setup Android SDK Command-line Tools
         run: |
-          # تجهيز مسار buildozer للـ SDK وربطه مباشرة مع SDK السيرفر الجاهز
-          mkdir -p ~/.buildozer/android/platform/android-sdk
-          ln -sfn $ANDROID_HOME/cmdline-tools ~/.buildozer/android/platform/android-sdk/tools
-          ln -sfn $ANDROID_HOME/platforms ~/.buildozer/android/platform/android-sdk/platforms
-          ln -sfn $ANDROID_HOME/platform-tools ~/.buildozer/android/platform/android-sdk/platform-tools
-          ln -sfn $ANDROID_HOME/build-tools ~/.buildozer/android/platform/android-sdk/build-tools
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /tmp/cmdline-tools.zip
+          unzip -q /tmp/cmdline-tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
 
-          # قبول جميع تراخيص أندرويد رسمياً وبشكل صامت
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          cp -r $ANDROID_HOME/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
+          # إنشاء رابط للأدوات القديمة tools/bin ليرضاها Buildozer
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools
+          ln -sfn ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin ~/.buildozer/android/platform/android-sdk/tools/bin
+
+          # قبول جميع تراخيص أندرويد
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build APK with Buildozer
         env:
