@@ -1,20 +1,27 @@
-[app]
-title = Rival Centipede
-package.name = rivalcentipede
-package.domain = org.miloud
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,wav,mp3,ogg,txt
-version = 0.1
-requirements = python3,kivy==2.2.1,plyer
+name: Build Android APK
 
-orientation = portrait
-fullscreen = 0
-android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = True
-android.api = 33
-android.minapi = 21
-android.ndk_api = 21
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: kivy/buildozer:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build APK
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3072m -Dorg.gradle.daemon=false"
+        run: |
+          yes | buildozer -v android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-apk
+          path: bin/*.apk
+          
