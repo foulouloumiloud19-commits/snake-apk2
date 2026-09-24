@@ -29,28 +29,17 @@ jobs:
           sudo apt update
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld
           pip install --upgrade pip
-          pip install --upgrade https://github.com/kivy/buildozer/archive/master.zip
-          pip install "cython<3.0"
+          pip install "buildozer>=1.5.0" "cython<3.0"
 
-      - name: Setup Fake SDK tools path & Licenses
+      - name: Accept System Android SDK Licenses
         run: |
-          # إنشاء المسار الدقيق الذي يطلبه Buildozer
-          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
-
-          # إنشاء ملف وهمي/موجه لـ sdkmanager يربطه بالأداة الحقيقية في النظام
-          cat << 'EOF' > ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-          #!/usr/bin/env bash
-          exec $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "$@"
-          EOF
-          chmod +x ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-
-          # قبول جميع تراخيص أندرويد ونسخها للمسار
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          cp -r $ANDROID_HOME/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build APK with Buildozer
         env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+          PATH: ${{ env.ANDROID_HOME }}/cmdline-tools/latest/bin:${{ env.ANDROID_HOME }}/platform-tools:${{ env.PATH }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
         run: |
           buildozer -v android debug
