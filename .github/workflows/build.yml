@@ -29,17 +29,24 @@ jobs:
           sudo apt update
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld
           pip install --upgrade pip
-          pip install "buildozer>=1.5.0" "cython<3.0"
+          pip install --upgrade https://github.com/kivy/buildozer/archive/master.zip
+          pip install "cython<3.0"
 
-      - name: Accept System Android SDK Licenses
+      - name: Accept Licenses & Prepare SDK
         run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # قبول التراخيص داخل النظام
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+          # نسخ مجلد التراخيص بالكامل إلى مسار buildozer لتفادي سؤال الرخصة نهائياً
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          cp -r $ANDROID_HOME/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
+
+          # إضافة مسار أدوات الأندرويد لمسارات النظام الرسمية
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
       - name: Build APK with Buildozer
         env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
-          PATH: ${{ env.ANDROID_HOME }}/cmdline-tools/latest/bin:${{ env.ANDROID_HOME }}/platform-tools:${{ env.PATH }}
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
         run: |
           buildozer -v android debug
