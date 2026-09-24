@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
 
       - name: Set up Java Development Kit (JDK 17)
         uses: actions/setup-java@v4
@@ -34,24 +33,19 @@ jobs:
 
       - name: Pre-accept Android Licenses Globally
         run: |
-          # قبول التراخيص في أدوات النظام المدمجة
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-          # إنشاء مجلدات التراخيص الرسمية مسبقاً لمسار Buildozer لمنع طلب التدخل التفاعلي
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
 
-          # كتابة مفاتيح التراخيص المعيارية الرسمية
           echo -e "24333f8a635ba8e1520d1c4f72a4b18341e4573b\n893777656631aaf738f7311144f8d1673739f90f\n33b6aa24eb74603f18899c80547903f0d2324e10\nd56f5187479451eabf01fb78af6dfcb131a6481e\n24333f8a635ba8e1520d1c4f72a4b18341e4573b" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           echo -e "84831b9409646a3e80e4b2deee860d70800c014b" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
       - name: Build APK with Buildozer
         env:
-          # استخدام إصدار NDK متوافق مع بايثون وتفادي تعليق السجلات
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
         run: |
-          # تنفيذ الأمر بأسلوب غير تفاعلي يرسل الموافقة دون إغراق السجل
           printf 'y\ny\ny\ny\ny\ny\ny\n' | buildozer -v android debug
 
       - name: Upload APK Artifact
