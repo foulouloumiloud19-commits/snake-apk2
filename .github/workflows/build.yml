@@ -27,21 +27,16 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld wget
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev libtinfo-dev lld
           pip install --upgrade pip
-          pip install "buildozer>=1.5.0" "cython<3.0"
+          pip install --upgrade https://github.com/kivy/buildozer/archive/master.zip
+          pip install "cython<3.0"
 
-      - name: Prepare Android SDK
+      - name: Pre-accept Android Licenses
         run: |
-          SDK_DIR="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_DIR/cmdline-tools"
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /tmp/tools.zip
-          unzip -q /tmp/tools.zip -d /tmp/cmdline-tools
-          mv /tmp/cmdline-tools/cmdline-tools "$SDK_DIR/cmdline-tools/latest"
-
-          # قبول التراخيص وتثبيت الأدوات الأساسية مسبقاً
-          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --install "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build APK with Buildozer
         env:
@@ -55,4 +50,3 @@ jobs:
           name: game-apk
           path: bin/*.apk
           if-no-files-found: error
-          
