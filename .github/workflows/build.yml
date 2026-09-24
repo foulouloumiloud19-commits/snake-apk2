@@ -31,19 +31,17 @@ jobs:
           pip install --upgrade pip
           pip install "buildozer>=1.5.0" "cython<3.0"
 
-      - name: Setup Android SDK Command-line Tools
+      - name: Prepare Android SDK
         run: |
-          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /tmp/cmdline-tools.zip
-          unzip -q /tmp/cmdline-tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+          SDK_DIR="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_DIR/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /tmp/tools.zip
+          unzip -q /tmp/tools.zip -d /tmp/cmdline-tools
+          mv /tmp/cmdline-tools/cmdline-tools "$SDK_DIR/cmdline-tools/latest"
 
-          # إنشاء رابط للأدوات القديمة tools/bin ليرضاها Buildozer
-          mkdir -p ~/.buildozer/android/platform/android-sdk/tools
-          ln -sfn ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin ~/.buildozer/android/platform/android-sdk/tools/bin
-
-          # قبول جميع تراخيص أندرويد
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # قبول التراخيص وتثبيت الأدوات الأساسية مسبقاً
+          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --install "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
       - name: Build APK with Buildozer
         env:
