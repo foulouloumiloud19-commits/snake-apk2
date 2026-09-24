@@ -32,14 +32,14 @@ jobs:
           pip install --upgrade https://github.com/kivy/buildozer/archive/master.zip
           pip install "cython<3.0"
 
-      - name: Pre-accept Android Licenses
+      - name: Accept All Android Licenses
         run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build APK with Buildozer
         env:
+          ANDROIDSDK: /usr/local/lib/android/sdk
+          ANDROIDNDK: /usr/local/lib/android/sdk/ndk/25.2.9519653
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
         run: |
           buildozer -v android debug
