@@ -1,27 +1,18 @@
-name: Build Android APK
+[app]
+title = Snake Game
+package.name = snakegame
+package.domain = org.test
+source.dir = .
+source.include_exts = py,png,jpg,kv,atlas
+version = 0.1
+requirements = python3,kivy
 
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+orientation = portrait
+fullscreen = 0
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    container: kivy/buildozer:latest
+android.archs = arm64-v8a
+android.allow_backup = True
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build APK
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3072m -Dorg.gradle.daemon=false"
-        run: |
-          yes | buildozer -v android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-apk
-          path: bin/*.apk
-          
+[buildozer]
+log_level = 2
+warn_on_root = 1
