@@ -30,8 +30,10 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython
 
-      - name: Build APK with Buildozer
+      - name: Accept Android Licenses & Build APK
         run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "24333f8a635ba8e1520d1c4f72a4b18341e4573b\n893777656631aaf738f7311144f8d1673739f90f\n33b6aa24eb74603f18899c80547903f0d2324e10" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           buildozer -v android debug
 
       - name: Upload APK
