@@ -12,14 +12,15 @@ except Exception:
     pass
 
 try:
-    pygame.mixer.init(22050, -16, 1, 512)
+    # تعديل القنوات إلى 2 والبافر إلى 1024 لضمان عمل الصوت على أندرويد بدون انهيار
+    pygame.mixer.init(22050, -16, 2, 1024)
 except Exception:
     pass
 
 info = pygame.display.Info()
 SCREEN_WIDTH = info.current_w if info.current_w > 0 else 720
 SCREEN_HEIGHT = info.current_h if info.current_h > 0 else 1280
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE | pygame.SCALED)
 pygame.display.set_caption("FOULOLOU MILOUD'S RIVAL CENTIPEDE")
 
 HEADER_HEIGHT = 84
@@ -169,13 +170,14 @@ def save_game_data(score, coins):
 
 high_score, total_coins = load_game_data()
 
-font_player_name = pygame.font.SysFont("arial", 28, bold=True)
-font_title = pygame.font.SysFont("arial", 46, bold=True)
-font_btn_giant = pygame.font.SysFont("arial", 32, bold=True)
-font_circle_giant = pygame.font.SysFont("arial", 27, bold=True)
-font_side_btn = pygame.font.SysFont("arial", 24, bold=True)
-font_score_bold = pygame.font.SysFont("arial", 24, bold=True)
-font_big_bold = pygame.font.SysFont("arial", 64, bold=True)
+# استخدام خط النظام المدمج لتجنب التقطيع في أندرويد
+font_player_name = pygame.font.Font(None, 28)
+font_title = pygame.font.Font(None, 46)
+font_btn_giant = pygame.font.Font(None, 32)
+font_circle_giant = pygame.font.Font(None, 27)
+font_side_btn = pygame.font.Font(None, 24)
+font_score_bold = pygame.font.Font(None, 24)
+font_big_bold = pygame.font.Font(None, 64)
 
 in_menu = True
 
@@ -1163,8 +1165,8 @@ class RealisticCentipede:
 snake = RealisticCentipede()
 
 # ----------------- تكبير الأزرار الدائرية العلوية والأزرار الجانبية -----------------
-CIRCLE_RAD = 56          # تكبير نصف قطر أزرار الخيارات من 48 إلى 56
-SIDE_BTN_RAD = 42        # تكبير نصف قطر زري PLAY و BOOST من 32 إلى 42
+CIRCLE_RAD = 56
+SIDE_BTN_RAD = 42
 
 circ_y1 = GAME_HEIGHT + int(PANEL_HEIGHT * 0.13)
 circ_y2 = GAME_HEIGHT + int(PANEL_HEIGHT * 0.28)
@@ -1314,7 +1316,6 @@ while running:
                 if not snake.alive:
                     snake.reset()
                 else:
-                    # فحص الضغط على الأزرار الجانبية المكبرة بدقة
                     if math.hypot(mx - circ_pause_left[0], my - circ_pause_left[1]) <= SIDE_BTN_RAD + 6:
                         snake.is_paused = not snake.is_paused
                     elif math.hypot(mx - circ_nitro[0], my - circ_nitro[1]) <= SIDE_BTN_RAD + 6:
